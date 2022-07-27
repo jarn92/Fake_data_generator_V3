@@ -311,22 +311,22 @@ def create_data_set(name_file,nbre_ligne,nbre_variable,Name_variables,Info_varia
 	if le.button('Create the new Data Set '): # il faut activer un boutton pour creer le data set pour calculer une fois les n lignes du data set 
 		
 
-		Values=get_values(Info_variables,nbre_ligne,nbre_variable)
-		df_fake_data=pd.DataFrame(dict(zip(Name_variables,Values))) 
+		Values=get_values(Info_variables,nbre_ligne,nbre_variable) #On calcule les valeur
+		df_fake_data=pd.DataFrame(dict(zip(Name_variables,Values))) #On forme le dataframe avec les noms et les valeurs
 		csv= convert_df(df_fake_data)
 		df_excel = to_excel(df_fake_data)
 				   
-		ce.download_button(label="📥 Download (.csv)",data=csv,file_name=f'{name_file}.csv',mime='text/csv')
-		ri.download_button(label="📥 Download (.xlsx)",data=df_excel,file_name=f'{name_file}.xlsx',mime='text/xlsx')
+		ce.download_button(label="📥 Download (.csv)",data=csv,file_name=f'{name_file}.csv',mime='text/csv') #Boutton pour telecharger le fichier en CSV
+		ri.download_button(label="📥 Download (.xlsx)",data=df_excel,file_name=f'{name_file}.xlsx',mime='text/xlsx') ##Boutton pour telecharger le fichier en Excel
 
 
 @st.cache
-def convert_df(df):
+def convert_df(df): # permet de convertir en csv
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv().encode('utf-8')
 
 
-def to_excel(df):
+def to_excel(df): # permet de convertir en excel
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Sheet1')
@@ -336,7 +336,9 @@ def to_excel(df):
 
 def main():
 	st.title('Fake_Data_Generator')
+	
 	name_file,nbre_ligne,nbre_variable=input()
+	
 	Name_variables,Info_variables=get_Names_Info(nbre_variable)
 	
 	create_sample(nbre_variable,Name_variables,Info_variables)
