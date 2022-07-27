@@ -289,9 +289,8 @@ def get_values(Info_variables,nbre_ligne,nbre_variable):
 
 	return res
 
-def create_sample(nbre_variable): # permet uniquemnt de creer un exemple de 5 lignes qui est affiché pour visualiser ce qu'on est en train de créer
+def create_sample(nbre_variable,Name_variables,Info_variables): # permet uniquemnt de creer un exemple de 5 lignes qui est affiché pour visualiser ce qu'on est en train de créer
 	
-	Name_variables,Info_variables=get_Names_Info(nbre_variable)
 	Values_Sample=get_values(Info_variables,5,nbre_variable)
 	Sample = pd.DataFrame(dict(zip(Name_variables,Values_Sample)))
 	st.header('Sample of the new data set')
@@ -306,12 +305,12 @@ def input(): #permet de récuperer les 3 premiers input à savoir le nom du fich
 
 	return (name_file,nbre_ligne,nbre_variable)
 
-def create_data_set(name_file,nbre_ligne,nbre_variable):
+def create_data_set(name_file,nbre_ligne,nbre_variable,Name_variables,Info_variables):
 	le,ce,ri=st.columns(3)
 
 	if le.button('Create the new Data Set '): # il faut activer un boutton pour creer le data set pour calculer une fois les n lignes du data set 
 		
-		Name_variables,Info_variables=get_Names_Info(nbre_variable)
+
 		Values=get_values(Info_variables,nbre_ligne,nbre_variable)
 		df_fake_data=pd.DataFrame(dict(zip(Name_variables,Values))) 
 		csv= convert_df(df_fake_data)
@@ -338,10 +337,11 @@ def to_excel(df):
 def main():
 	st.title('Fake_Data_Generator')
 	name_file,nbre_ligne,nbre_variable=input()
+	Name_variables,Info_variables=get_Names_Info(nbre_variable)
 	
-	create_sample(nbre_variable)
+	create_sample(nbre_variable,Name_variables,Info_variables)
 	
-	create_data_set(name_file,nbre_ligne,nbre_variable)
+	create_data_set(name_file,nbre_ligne,nbre_variable,Name_variables,Info_variables)
 main()
 
 
