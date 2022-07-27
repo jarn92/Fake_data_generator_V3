@@ -14,26 +14,31 @@ from mimesis.locales import Locale
 from io import BytesIO
 
 
-
-def erase(i):
-	st.session_state[f'variable n°{i}']=""
-
 def create_matrix(n):
 	return [[] for k in range(n)]
 
 def get_windows(nbre_variable):
-	for i in range(nbre_variable):
-		if f'variable n°{i}' not in st.session_state:
+	"""
+	we create the windows for the layout of the variables
+	"""
+	for i in range(nbre_variable):# on boucle pour chaque variable à creer 
+		if f'variable n°{i}' not in st.session_state:# si son nom n'a pas encore été modifié je lui assigne la valeur variable n°{i+1}
 			st.session_state[f'variable n°{i}']=f'variable n°{i+1}'
-	return st.tabs([st.session_state[f'variable n°{i}'] for i in range(nbre_variable)])
+	return st.tabs([st.session_state[f'variable n°{i}'] for i in range(nbre_variable)]) #je retourne une liste de fenêtre qui correspond à nos variables
 
 def get_Info(index_varaible,i):
+	"""
+	create the liste of the parametres wich define the variable n°indexe_variable (the second indexe i is used for the dependant variables)
+	"""
 	res=[]
-	l,c,r=st.columns(3) 
-	choice=l.selectbox('Which varaible do you want ?',('pre-made','personalized'),help='With the pre-made: you will use pre-made data base; with the personalized: you will need to provide it',key=f'{index_varaible}_{i}')
-	res.append(choice)
+	l,c,r=st.columns(3) #permet de partitionner l'espace en 3 colonnes
+	choice=l.selectbox('Which varaible do you want ?',('pre-made','personalized'),help='With the pre-made: you will use pre-made data base; with the personalized: you will need to provide it',key=f'{index_varaible}_{i}') # permet de faire son choix entre pre-made et personalized
+	res.append(choice)# on ajoute ce choix à la liste des paramètres
 
 	if choice=='pre-made':
+		"""
+		si on a choisit pre-made on doit faire le choix de son repertoire puis de la base de donnée
+		"""
 		type_variable=c.selectbox('Wich data do you want ?',('Address','Finance','Datetime','Person','Science'),key=f'type_variable{i}{index_varaible}')
 		lov_categories = ['Address','Finance','Datetime','Person','Science']
 		address_lovs = ('address','calling_code','city','continent','coordinates','country','federal_subject','latitude','postal_code','province','region','street_name','street_number')
@@ -44,29 +49,32 @@ def get_Info(index_varaible,i):
 		lovs = [address_lovs, finance_lovs, datetime_lovs, person_lovs, science_lovs]
 		dict_lovs = dict(zip(lov_categories, lovs))
 		variable=r.selectbox(f'Which {type_variable} do you want ?', dict_lovs[type_variable], key=f'variable{i}_{index_varaible}')
-		res.append(variable)
+		res.append(variable) #on ajoute la base de donnée a la liste des paramètre
 
 	else:
-		type_variable=c.selectbox('wich type of data do you want ?',('int','float','categorical'),key=f'type{i}_{index_varaible}')
+		type_variable=c.selectbox('wich type of data do you want ?',('int','float','categorical'),key=f'type{i}_{index_varaible}') #permet de choisir le type de la variable si elle est personnalisée
 		res.append(type_variable)
 
 		if type_variable=='float'or type_variable=='int':
 			le,ri=st.columns(2)
-			loi=r.selectbox('Wich law do you want ?',('uniform','gauss'),key=f'law{i}_{index_varaible}')
-			res.append(loi)
+			loi=r.selectbox('Wich law do you want ?',('uniform','gauss'),key=f'law{i}_{index_varaible}') # pour des variables entieres et floattantes on peut choisir sa loi
+			res.append(loi) # on ajoute ce choix à la liste de paramètres
 			if loi=='uniform' :
 				max_=le.number_input('value max',key=f'max{i}_{index_varaible}')
 				min_=ri.number_input('value min',key=f'min{i}_{index_varaible}')
-				res.append((min_,max_))
+				res.append((min_,max_)) #on ajoute les coefficients significatif de chaque loi à la liste de paramètres
 			elif loi=='gauss':
 				moy=le.number_input('mean',key=f'moy{i}')
 				sig=ri.number_input('standard error',key=f'sig{i}_{index_varaible}')
 				res.append((moy,sig))
 		else:
-			nbre_category=r.number_input('How many category ?',min_value=1,max_value=12,step=1,key=f'nbre_category{i}_{index_varaible}')
-			liste=[]
-			list_weigth=[]
-			columns=st.columns(6)
+			nbre_category=r.number_input('How many category ?',min_value=1,max_value=12,step=1,key=f'nbre_category{i}_{index_varaible}') # si c'est une variable catégorique on ajoute le nombre de catégories qu'on souhaite
+			liste=[] # la liste des catégories 
+			list_weigth=[] # la liste des poids 
+			columns=st.columns(6) # permet de partionner l'espace en 6
+			"""
+			ces boucles permettent de possitionner correctement les boutons des catégories et le poids 
+			"""
 			for m in range(int(nbre_category//3)):
 				for w in range(3):
 					liste.append(columns[2*w].text_input('Category',key=f'quotient{i}{w}{m}_{index_varaible}'))
@@ -74,13 +82,17 @@ def get_Info(index_varaible,i):
 			for j in range(int(nbre_category%3)):
 				liste.append(columns[2*j].text_input('Category',key=f'rest{i}{j}_{index_varaible}'))
 				list_weigth.append(columns[2*j+1].number_input('Weight',min_value=1,step=1,key=f'weight_rest{i}{j}_{index_varaible}'))
+
 			res.append(liste)
-			res.append(list_weigth)
+			res.append(list_weigth)#on ajoute ces deux listes à la liste des paramètres
 	return res
 
-def get_behavior(variable_linked,i,index_varaible):
+def get_partition(variable_linked,i,index_varaible):
+	"""
+	cette fonction a pour but de récupérer les partitions de la variable de liaisons 
+	"""
 	l,r=st.columns(2)
-
+	#on fait un filtrage sur le type de la variable de liaison pour calibrer la partition
 	if variable_linked[2]=='categorical':
 		return (st.multiselect('Wich categories do you want',variable_linked[3],key=f'list_behavior{i}{index_varaible}'))
 			
@@ -95,49 +107,51 @@ def get_behavior(variable_linked,i,index_varaible):
 		return ([valeur_min,valeur_max])
 
 def get_info_dependant(index_varaible,Name_variables,Info_variables):
-	
-	
-
+	"""
+	cete fonction a pour but de recuperer les infos necessaires à la construction des variables dependantes d'une autre variables
+	"""
 	l,c,r=st.columns(3)
 
-	type_dependance=l.selectbox('Wich type of dependance ?',('categorical','formula'))
+	type_dependance=l.selectbox('Wich type of dependance ?',('categorical','formula'),key=f'type_dependance{index_varaible}')
 	Info_variables[index_varaible].append(type_dependance)
 		
-	if type_dependance=='categorical':
+	if type_dependance=='categorical':#Ici on doit recuperer la liste des partitions et la liste des comportements de la variables pour chaque partie de la partition
+		
 		list_independant_categorical=[Name_variables[k]  for k in range(len(Name_variables)) if (Info_variables[k][0]=='independant' and Info_variables[k][1]=='personalized')]
-		name_dependance=c.selectbox('Dependance with wich variables ?',list_independant_categorical,key=f'index_dependance{index_varaible}')
+		name_dependance=c.selectbox('Dependance with wich variables ?',list_independant_categorical,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées
 		index_dependance=get_index_from_name(name_dependance,Name_variables)
 		variable_linked=Info_variables[index_dependance]
-		nbre_behavior=r.number_input('How many behavior do you want ?',step=1,min_value=1,key=f'behavior{index_varaible}')
-		#pour les varaibles dependante 0: dependant 1: indexe de la variable de liason 2:liste des comportement(liste des categories ou doublet si int ou float 3:liste des nouvezaux comportements de la variable)
+		
+		nbre_behavior=r.number_input('How many behavior do you want ?',step=1,min_value=1,key=f'behavior{index_varaible}')# On demande ici le nombre de comportment et donc de partition 
+		
 		Info_variables[index_varaible].append(index_dependance)
+		list_partition=[]
 		list_behavior=[]
-		list_new_behavior=[]
-		new_windows=st.tabs([f'behavior n°{k}' for k in range(int(nbre_behavior))])
+		new_windows=st.tabs([f'behavior n°{k}' for k in range(int(nbre_behavior))]) # Comme pour les variables on créer des panneaux d'affichage pour chaque partie et nouveaux comportement
 
 		for i in range(int(nbre_behavior)):
 			with new_windows[i]:
 				st.subheader("Define the partition")
-				list_behavior.append(get_behavior(variable_linked,index_varaible,i))
+				list_partition.append(get_partition(variable_linked,index_varaible,i)) #On ajoute les nouvelles parties
 				st.subheader("Define the behavior")
-				list_new_behavior.append(get_Info(index_varaible,i))
-		Info_variables[index_varaible].append(list_behavior)
-		Info_variables[index_varaible].append(list_new_behavior)
+				list_behavior.append(get_Info(index_varaible,i))#on ajoute les nouveaux comportements
+		Info_variables[index_varaible].append(list_partition)
+		Info_variables[index_varaible].append(list_behavior)#Puis on les rajoute à la liste des paramètres
 
 	else :
 		list_independant_formula=[Name_variables[k] for k in range(len(Name_variables)) if ( (Info_variables[k][1]=='personalized') and  (Info_variables[k][2]=='int'or Info_variables[k][2]=='float' )) ]
-		name_dependance=c.selectbox('Dependance with wich variables ?',list_independant_formula,key=f'index_dependance{index_varaible}')
+		name_dependance=c.selectbox('Dependance with wich variables ?',list_independant_formula,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées et dont le type est entier ou floattant pour ce type de liaison
 		index_dependance=get_index_from_name(name_dependance,Name_variables)
 		Info_variables[index_varaible].append(index_dependance)
 
-		with st.expander('Exemple and repertory'):
+		with st.expander('Exemple and repertory'):#annexe qui repertorie le fonctionnement, un exemple et les fonctions utilisable
 			st.write(f'{Name_variables[index_varaible]} will take the value of what you will write on the formula')
 			st.write(f'x represents the value of {name_dependance}')
 			st.write(f'Exemple : if you want {Name_variables[index_varaible]} to be the double of {name_dependance};  write 2*x ')
 			st.write("You can use the fonction exponential with exp ; sinus with sin ; cosinus with cos")
 			st.write("You can  use random module like randint(a,b) wich will take an integer between a and b; same with random(a,b) but for float ")
 			st.write("You can  use gauss(a,b) the generate a number wich folow a normale law with a mean of a and a standard error of b")
-		#display all the function and the syntaxe
+		
 		if f'formula{index_varaible}' not in st.session_state:
 			st.session_state[f'formula{index_varaible}']=""
 		st.text_input('Enter your formula',key=f'formula{index_varaible}')
