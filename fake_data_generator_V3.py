@@ -306,11 +306,12 @@ def input(): #permet de récuperer les 3 premiers input à savoir le nom du fich
 
 	return (name_file,nbre_ligne,nbre_variable)
 
-def create_data_set(name_file,nbre_ligne,nbre_variable,Info_variables,Name_variables):
+def create_data_set(name_file,nbre_ligne,nbre_variable):
 	le,ce,ri=st.columns(3)
 
 	if le.button('Create the new Data Set '): # il faut activer un boutton pour creer le data set pour calculer une fois les n lignes du data set 
-
+		
+		Name_variables,Info_variables=get_Names_Info(nbre_variable)
 		Values=get_values(Info_variables,nbre_ligne,nbre_variable)
 		df_fake_data=pd.DataFrame(dict(zip(Name_variables,Values))) 
 		csv= convert_df(df_fake_data)
@@ -340,7 +341,7 @@ def main():
 	
 	create_sample(nbre_variable)
 	
-	create_data_set(name_file,nbre_ligne,nbre_variable,Info_variables,Name_variables)
+	create_data_set(name_file,nbre_ligne,nbre_variable)
 main()
 
 
