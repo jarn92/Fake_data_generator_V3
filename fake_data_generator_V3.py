@@ -227,7 +227,7 @@ def get_value(variable_description,nbre_ligne):
 		_res=[field(variable_description[1]) for k in range(nbre_ligne)] 
 	else:
 		if variable_description[1]=='float' or variable_description[1]=='int':
-			if variable_description[2]=='uniform':
+			if variable_description[2]=='uniform': 
 				mi,ma=variable_description[3]
 				if variable_description[1]=='float':
 					_res=[random.uniform(mi,ma) for k in range(nbre_ligne)]
@@ -250,10 +250,10 @@ def get_values(Info_variables,nbre_ligne,nbre_variable):
 	#Cette fonction a pour but de creer les colonne de valeur pour toutes les variables
 	
 	res=[]
-	for i in range(nbre_variable):
-		val=[]
-		if Info_variables[i][0]=='independant':	
-			val=get_value(Info_variables[i][1:],nbre_ligne) #On apelle cette fonction avec uniquement les info des paramètre qui nous importe
+	for i in range(nbre_variable): # On va créer pour chaque variable le tableau de valeur
+		val=[] # On créer la tableau de valeur de la variable i
+		if Info_variables[i][0]=='independant':	# Pour les vraibles indépendante on peut calculer directement tout le tableau
+			val=get_value(Info_variables[i][1:],nbre_ligne) #On apelle cette fonction avec uniquement les infos des paramètres qui nous importe
 			
 		else:
 			index_dependance=Info_variables[i][2]
