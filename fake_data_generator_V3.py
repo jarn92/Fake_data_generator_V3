@@ -13,34 +13,33 @@ from mimesis import Field
 from mimesis.locales import Locale
 from io import BytesIO
 
-[runner]
-magicEnabled = False
+
 
 def create_matrix(n):
 	return [[] for k in range(n)]
 
 def get_windows(nbre_variable):
-	"""
-	we create the windows for the layout of the variables
-	"""
+	
+	#we create the windows for the layout of the variables
+	
 	for i in range(nbre_variable):# on boucle pour chaque variable à creer 
 		if f'variable n°{i}' not in st.session_state:# si son nom n'a pas encore été modifié je lui assigne la valeur variable n°{i+1}
 			st.session_state[f'variable n°{i}']=f'variable n°{i+1}'
 	return st.tabs([st.session_state[f'variable n°{i}'] for i in range(nbre_variable)]) #je retourne une liste de fenêtre qui correspond à nos variables
 
 def get_Info(index_varaible,i):
-	"""
-	create the liste of the parametres wich define the variable n°indexe_variable (the second indexe i is used for the dependant variables)
-	"""
+	
+	#create the liste of the parametres wich define the variable n°indexe_variable (the second indexe i is used for the dependant variables)
+	
 	res=[]
 	l,c,r=st.columns(3) #permet de partitionner l'espace en 3 colonnes
 	choice=l.selectbox('Which varaible do you want ?',('pre-made','personalized'),help='With the pre-made: you will use pre-made data base; with the personalized: you will need to provide it',key=f'{index_varaible}_{i}') # permet de faire son choix entre pre-made et personalized
 	res.append(choice)# on ajoute ce choix à la liste des paramètres
 
 	if choice=='pre-made':
-		"""
-		si on a choisit pre-made on doit faire le choix de son repertoire puis de la base de donnée
-		"""
+		
+		#si on a choisit pre-made on doit faire le choix de son repertoire puis de la base de donnée
+		
 		type_variable=c.selectbox('Wich data do you want ?',('Address','Finance','Datetime','Person','Science'),key=f'type_variable{i}{index_varaible}')
 		lov_categories = ['Address','Finance','Datetime','Person','Science']
 		address_lovs = ('address','calling_code','city','continent','coordinates','country','federal_subject','latitude','postal_code','province','region','street_name','street_number')
@@ -74,9 +73,9 @@ def get_Info(index_varaible,i):
 			liste=[] # la liste des catégories 
 			list_weigth=[] # la liste des poids 
 			columns=st.columns(6) # permet de partionner l'espace en 6
-			"""
-			ces boucles permettent de possitionner correctement les boutons des catégories et le poids 
-			"""
+		
+			#ces boucles permettent de possitionner correctement les boutons des catégories et le poids 
+		
 			for m in range(int(nbre_category//3)):
 				for w in range(3):
 					liste.append(columns[2*w].text_input('Category',key=f'quotient{i}{w}{m}_{index_varaible}'))
@@ -90,9 +89,9 @@ def get_Info(index_varaible,i):
 	return res
 
 def get_partition(variable_linked,i,index_varaible):
-	"""
-	cette fonction a pour but de récupérer les partitions de la variable de liaisons 
-	"""
+	
+	#cette fonction a pour but de récupérer les partitions de la variable de liaisons 
+
 	l,r=st.columns(2)
 	#on fait un filtrage sur le type de la variable de liaison pour calibrer la partition
 	if variable_linked[2]=='categorical':
@@ -109,9 +108,9 @@ def get_partition(variable_linked,i,index_varaible):
 		return ([valeur_min,valeur_max])
 
 def get_info_dependant(index_varaible,Name_variables,Info_variables):
-	"""
-	cete fonction a pour but de recuperer les infos necessaires à la construction des variables dependantes d'une autre variables
-	"""
+	
+	#cette fonction a pour but de recuperer les infos necessaires à la construction des variables dependantes d'une autre variables
+	
 	l,c,r=st.columns(3)
 
 	type_dependance=l.selectbox('Wich type of dependance ?',('categorical','formula'),key=f'type_dependance{index_varaible}')
@@ -167,9 +166,9 @@ def get_index_from_name(name,Name_variables): # Permet de récupérer l'indice d
 
 
 def get_Names_Info(nbre_variable):
-	"""
-	cette fonction creer la liste des nom des variables et redirige les variables indépendante et dépendante vers d'autres fonctions qui s'occupe de récuperer leurs paramètres
-	"""
+	
+	#cette fonction creer la liste des nom des variables et redirige les variables indépendante et dépendante vers d'autres fonctions qui s'occupe de récuperer leurs paramètres
+
 	
 	windows=get_windows(nbre_variable) # créer les fenetres liées aux variables
 	Name_variables=[] # la listes des noms de variables 
@@ -193,9 +192,9 @@ def get_Names_Info(nbre_variable):
 	return (Name_variables,Info_variables)
 
 def get_one_value(variable_description): 
-	"""
-	Cette fonction a pour but de renvoyer une valeur en fonction d'une liste de paramètre pour les variables DEPENDANTES CATEGORIQUE
-	"""
+	
+	#Cette fonction a pour but de renvoyer une valeur en fonction d'une liste de paramètre pour les variables DEPENDANTES CATEGORIQUE
+	
 	if variable_description[0]=='pre-made': # Pour les vraibles qui utilise des base de données on va chercher le bon repertoire puis on prend une valeur aléatoire dans ce répertoire grace à mimesis 
 		field=Field(Locale.EN) # permet de génerer des données en localisées dans le monde anglophone ou en langue anglaise ex noms, prénom, ville ...
 		_res=field(variable_description[1]) 
@@ -220,9 +219,9 @@ def get_one_value(variable_description):
 	return _res
 
 def get_value(variable_description,nbre_ligne):
-	"""
-	Cette fonction est la même que get_one_value mais permet de sortir directement la colonne entière; elle s'adresse aux variables INDEPENDANTES
-	"""
+
+	#Cette fonction est la même que get_one_value mais permet de sortir directement la colonne entière; elle s'adresse aux variables INDEPENDANTES
+
 	if variable_description[0]=='pre-made':
 		field=Field(Locale.EN)
 		_res=[field(variable_description[1]) for k in range(nbre_ligne)] 
@@ -247,9 +246,9 @@ def get_value(variable_description,nbre_ligne):
 	return _res
 
 def get_values(Info_variables,nbre_ligne,nbre_variable):
-	"""
-	Cette fonction a pour but de creer les colonne de valeur pour toutes les variables
-	"""
+	
+	#Cette fonction a pour but de creer les colonne de valeur pour toutes les variables
+	
 	res=[]
 	for i in range(nbre_variable):
 		val=[]
