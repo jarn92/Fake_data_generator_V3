@@ -140,7 +140,7 @@ def get_info_dependant(index_varaible,Name_variables,Info_variables):
 		Info_variables[index_varaible].append(list_behavior)#Puis on les rajoute à la liste des paramètres
 
 	else :
-		list_independant_formula=[Name_variables[k] for k in range(len(Name_variables)) if ( (Info_variables[k][1]=='personalized') and  (Info_variables[k][2]=='int'or Info_variables[k][2]=='float' )) ]
+		list_independant_formula=[Name_variables[k] for k in range(len(Name_variables)) if ( (Info_variables[k][1]=='personalized' or Info_variables[k][1]=='formula') and  (Info_variables[k][2]=='int'or Info_variables[k][2]=='float' )) ]
 		name_dependance=c.selectbox('Dependance with wich variables ?',list_independant_formula,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées et dont le type est entier ou floattant pour ce type de liaison
 		index_dependance=get_index_from_name(name_dependance,Name_variables)
 		Info_variables[index_varaible].append(index_dependance)
