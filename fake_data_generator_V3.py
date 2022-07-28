@@ -13,7 +13,6 @@ from mimesis import Field
 from mimesis.locales import Locale
 from io import BytesIO
 
-[runner]
 magicEnabled = false
 
 def create_matrix(n):
