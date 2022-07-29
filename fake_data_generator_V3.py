@@ -29,18 +29,18 @@ def get_windows(nbre_variable):
 
 def get_Info(index_varaible,i):
 	
-	#create the liste of the parametres wich define the variable n°indexe_variable (the second indexe i is used for the dependant variables)
+	#create the liste of the parametres Which define the variable n°indexe_variable (the second indexe i is used for the dependant variables)
 	
 	res=[]
 	l,c,r=st.columns(3) #permet de partitionner l'espace en 3 colonnes
-	choice=l.selectbox('Which varaible do you want ?',('pre-made','personalized'),help='With the pre-made: you will use pre-made data base; with the personalized: you will need to provide it',key=f'{index_varaible}_{i}') # permet de faire son choix entre pre-made et personalized
+	choice=l.selectbox('Which varaible do you want ?',('personalized','pre-made'),help='With the pre-made: you will use pre-made data base; with the personalized: you will need to provide it',key=f'{index_varaible}_{i}') # permet de faire son choix entre pre-made et personalized
 	res.append(choice)# on ajoute ce choix à la liste des paramètres
 
 	if choice=='pre-made':
 		
 		#si on a choisit pre-made on doit faire le choix de son repertoire puis de la base de donnée
 		
-		type_variable=c.selectbox('Wich data do you want ?',('Address','Finance','Datetime','Person','Science'),key=f'type_variable{i}{index_varaible}')
+		type_variable=c.selectbox('Which data do you want ?',('Address','Finance','Datetime','Person','Science'),key=f'type_variable{i}{index_varaible}')
 		lov_categories = ['Address','Finance','Datetime','Person','Science']
 		address_lovs = ('address','calling_code','city','continent','coordinates','country','federal_subject','latitude','postal_code','province','region','street_name','street_number')
 		finance_lovs = ('company','company_type','cryptocurrency_iso_code','currency_symbol')
@@ -53,12 +53,12 @@ def get_Info(index_varaible,i):
 		res.append(variable) #on ajoute la base de donnée a la liste des paramètre
 
 	else:
-		type_variable=c.selectbox('wich type of data do you want ?',('int','float','categorical'),key=f'type{i}_{index_varaible}') #permet de choisir le type de la variable si elle est personnalisée
+		type_variable=c.selectbox('Which type of data do you want ?',('int','float','categorical'),key=f'type{i}_{index_varaible}') #permet de choisir le type de la variable si elle est personnalisée
 		res.append(type_variable)
 
 		if type_variable=='float'or type_variable=='int':
 			le,ri=st.columns(2)
-			loi=r.selectbox('Wich law do you want ?',('uniform','gauss'),key=f'law{i}_{index_varaible}') # pour des variables entieres et floattantes on peut choisir sa loi
+			loi=r.selectbox('Which law do you want ?',('uniform','gauss'),key=f'law{i}_{index_varaible}') # pour des variables entieres et floattantes on peut choisir sa loi
 			res.append(loi) # on ajoute ce choix à la liste de paramètres
 			if loi=='uniform' :
 				max_=le.number_input('value max',key=f'max{i}_{index_varaible}')
@@ -88,21 +88,40 @@ def get_Info(index_varaible,i):
 			res.append(list_weigth)#on ajoute ces deux listes à la liste des paramètres
 	return res
 
+def concat(matrice_cat):
+	mat=[]
+	for j in range(len(matrice_cat)):
+		mat.append(matrice_cat[j][2])
+	
+	res=[]
+	for l in mat:
+		for x in l:
+			if x not in res:
+				res.append(x)
+
+	return res
+
+
 def get_partition(variable_linked,i,index_varaible):
 	
 	#cette fonction a pour but de récupérer les partitions de la variable de liaisons 
 
 	l,r=st.columns(2)
 	#on fait un filtrage sur le type de la variable de liaison pour calibrer la partition
-	if variable_linked[2]=='categorical':
-		return (st.multiselect('Wich categories do you want',variable_linked[3],key=f'list_behavior{i}{index_varaible}'))
+	if (variable_linked[0]=='independant' and variable_linked[2]=='categorical') or (variable_linked[0]=='dependant' and variable_linked[1]=='categorical' and variable_linked[4][0][1]=='categorical'):
+		if (variable_linked[0]=='independant' and variable_linked[2]=='categorical'):
+			return (st.multiselect('Which categories do you want',variable_linked[3],key=f'list_behavior{i}{index_varaible}'))
+		else:
+			list_category=concat(variable_linked[4])
+			return (st.multiselect('Which categories do you want',list_category,key=f'list_behavior{i}{index_varaible}'))
+
 			
-	elif variable_linked[2]=='int':
+	elif (variable_linked[0]=='independant' and variable_linked[2]=='int') or (variable_linked[0]=='dependant' and variable_linked[1]=='categorical' and variable_linked[4][0][1]=='int') :
 		valeur_min=r.number_input('min value',step=1,key=f'valeur_min{i}{index_varaible}')
 		valeur_max=l.number_input('max value',step=1,key=f'valeur_max{i}{index_varaible}')
 		return ([valeur_min,valeur_max])
 
-	elif variable_linked[2]=='float':
+	elif (variable_linked[0]=='independant' and variable_linked[2]=='float') or (variable_linked[0]=='dependant' and variable_linked[1]=='categorical' and variable_linked[4][0][1]=='float') or ( variable_linked[0]=='dependant' and variable_linked[1]=='formula'):
 		valeur_min=r.number_input('min value',key=f'valeur_min{i}{index_varaible}')
 		valeur_max=l.number_input('max value',key=f'valeur_max{i}{index_varaible}')
 		return ([valeur_min,valeur_max])
@@ -113,13 +132,13 @@ def get_info_dependant(index_varaible,Name_variables,Info_variables):
 	
 	l,c,r=st.columns(3)
 
-	type_dependance=l.selectbox('Wich type of dependance ?',('categorical','formula'),key=f'type_dependance{index_varaible}')
+	type_dependance=l.selectbox('Which type of dependance ?',('categorical','formula'),key=f'type_dependance{index_varaible}')
 	Info_variables[index_varaible].append(type_dependance)
 		
 	if type_dependance=='categorical':#Ici on doit recuperer la liste des partitions et la liste des comportements de la variables pour chaque partie de la partition
 		
-		list_independant_categorical=[Name_variables[k]  for k in range(len(Name_variables)) if (Info_variables[k][0]=='independant' and Info_variables[k][1]=='personalized')]
-		name_dependance=c.selectbox('Dependance with wich variables ?',list_independant_categorical,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées
+		list_independant_categorical=[Name_variables[k]  for k in range(len(Name_variables)-1) if ((Info_variables[k][1]=='personalized' ) or (Info_variables[k][0]=='dependant' and Info_variables[k][1]=='categorical' and Info_variables[k][4][0][0]!='pre-made') or ( Info_variables[k][0]=='dependant' and Info_variables[k][1]=='formula'))]
+		name_dependance=c.selectbox('Dependance with Which variables ?',list_independant_categorical,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées
 		index_dependance=get_index_from_name(name_dependance,Name_variables)
 		variable_linked=Info_variables[index_dependance]
 		
@@ -140,8 +159,8 @@ def get_info_dependant(index_varaible,Name_variables,Info_variables):
 		Info_variables[index_varaible].append(list_behavior)#Puis on les rajoute à la liste des paramètres
 
 	else :
-		list_independant_formula=[Name_variables[k] for k in range(len(Name_variables)) if ( (Info_variables[k][1]=='personalized') and  (Info_variables[k][2]=='int'or Info_variables[k][2]=='float' )) ]
-		name_dependance=c.selectbox('Dependance with wich variables ?',list_independant_formula,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées et dont le type est entier ou floattant pour ce type de liaison
+		list_independant_formula=[Name_variables[k] for k in range(len(Name_variables)-1) if ( (Info_variables[k][0]=='independant' and Info_variables[k][1]=='personalized' and  Info_variables[k][2]!='categorical') or (Info_variables[k][0]=='dependant' and  Info_variables[k][1]=='categorical' and Info_variables[k][4][0][1]!='categorical') or ( Info_variables[k][0]=='dependant' and Info_variables[k][1]=='formula') ) ]
+		name_dependance=c.selectbox('Dependance with Which variables ?',list_independant_formula,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées et dont le type est entier ou floattant pour ce type de liaison
 		index_dependance=get_index_from_name(name_dependance,Name_variables)
 		Info_variables[index_varaible].append(index_dependance)
 
@@ -150,15 +169,15 @@ def get_info_dependant(index_varaible,Name_variables,Info_variables):
 			st.write(f'x represents the value of {name_dependance}')
 			st.write(f'Exemple : if you want {Name_variables[index_varaible]} to be the double of {name_dependance};  write 2*x ')
 			st.write("You can use the fonction exponential with exp ; sinus with sin ; cosinus with cos")
-			st.write("You can  use random module like randint(a,b) wich will take an integer between a and b; same with random(a,b) but for float ")
-			st.write("You can  use gauss(a,b) the generate a number wich folow a normale law with a mean of a and a standard error of b")
+			st.write("You can  use random module like randint(a,b) Which will take an integer between a and b; same with uniform(a,b) but for float ")
+			st.write("You can  use gauss(a,b) the generate a number Which folow a normale law with a mean of a and a standard error of b")
 		
 		if f'formula{index_varaible}' not in st.session_state: # Permet d'initialiser la valeur de la formule a ""
 			st.session_state[f'formula{index_varaible}']=""
 			
 		st.text_input('Enter your formula',key=f'formula{index_varaible}') #la valeur de la formule est stocké dans la clefs f'formula{index_varaible}'
 		Info_variables[index_varaible].append(st.session_state[f'formula{index_varaible}']) # On ajoute la formule de liaison à la liste de paramètre
-
+		
 def get_index_from_name(name,Name_variables): # Permet de récupérer l'indice d'une variable par son nom  
 	for i in range(len(Name_variables)):
 		if name==Name_variables[i]:
@@ -179,7 +198,7 @@ def get_Names_Info(nbre_variable):
 			l,r=st.columns(2)
 			l.text_input('Enter the name of the variable',key=f'variable n°{i}') # modifie le contenu de la clefs f'variable n°{i}'
 			Name_variables.append(st.session_state[f'variable n°{i}'])
-			dependance=r.selectbox('Wich dependance do you want ?',('independant','dependant'),key=f'dependance{i}') # récupère le caractère de dépendance
+			dependance=r.selectbox('Which dependance do you want ?',('independant','dependant'),key=f'dependance{i}') # récupère le caractère de dépendance
 			Info_variables[i].append(dependance)
 
 			if dependance=='independant':
@@ -222,12 +241,12 @@ def get_value(variable_description,nbre_ligne):
 
 	#Cette fonction est la même que get_one_value mais permet de sortir directement la colonne entière; elle s'adresse aux variables INDEPENDANTES
 
-	if variable_description[0]=='pre-made':
-		field=Field(Locale.EN)
-		_res=[field(variable_description[1]) for k in range(nbre_ligne)] 
-	else:
-		if variable_description[1]=='float' or variable_description[1]=='int':
-			if variable_description[2]=='uniform': 
+	if variable_description[0]=='pre-made':# Pour les vraibles qui utilise des base de données on va chercher le bon repertoire puis on prend une valeur aléatoire dans ce répertoire grace à mimesis 
+		field=Field(Locale.EN)# permet de génerer des données en localisées dans le monde anglophone ou en langue anglaise ex noms, prénom, ville ...
+		_res=[field(variable_description[1]) for k in range(nbre_ligne)] # Dans cette fonction on renvoie donc directement la colonne entière
+	else:# On gere ici les variables personnalisées
+		if variable_description[1]=='float' or variable_description[1]=='int':# Pour un entier ou un floattant on va filtrer sur la loi car les paramètres sont de la meme forme (ie seule le type change)
+			if variable_description[2]=='uniform':  # On filtre sur la loi pour savoir comment générer la donnée
 				mi,ma=variable_description[3]
 				if variable_description[1]=='float':
 					_res=[random.uniform(mi,ma) for k in range(nbre_ligne)]
@@ -239,7 +258,7 @@ def get_value(variable_description,nbre_ligne):
 				if variable_description[2]=='float':
 					_res=random.gauss(moy,sig)
 				else:
-					_res= [int(random.gauss(int(moy),int(sig))) for k in range(nbre_ligne)]
+					_res= [int(random.gauss(int(moy),int(sig))) for k in range(nbre_ligne)] # ici pour renvoyer un entier on passe le resultat à la fonction int()
 		else:
 			_res = random.choices(variable_description[2],weights=variable_description[3],k=nbre_ligne)
 
@@ -263,14 +282,16 @@ def get_values(Info_variables,nbre_ligne,nbre_variable):
 				for j in range(nbre_ligne): # Pour chaque ligne on va regarder dans quelle partie de la partition on se trouve et on va lui affecter le comportement associé 
 					k=0
 					mod=False # Permet de verifier si pour chaque ligne il existe bein une partie à laquelle elle appartient 
-					while k<len(Info_variables[i][3]) and mod == False: # On se ballade parmis toutes les parties de la partition
-						
-						if variable_linked[2]=='categorical':
+					while k<len(Info_variables[i][3]) and mod == False: # On se ballade parmi toutes les parties de la partition
+						if res[index_dependance][j] == None :
+							val.append(None)
+							mod = True
+
+						elif (variable_linked[0]=='independant' and variable_linked[2]=='categorical') or (variable_linked[0]=='dependant' and variable_linked[1]=='categorical' and variable_linked[4][0][1]=='categorical'):
 							if res[index_dependance][j] in Info_variables[i][3][k]: # Pour les vriables catégorique on verifies si la valeur de la ligne est dans la liste des catégories de la parties
 								val.append(get_one_value(Info_variables[i][4][k])) #Si c'est le cas on créer une valeur avec le comportement lié a cette partie
 								mod = True
 						else:
-
 							min_,max_=Info_variables[i][3][k][0],Info_variables[i][3][k][1]
 							if res[index_dependance][j] >= min_ and res[index_dependance][j]<max_: # Pour les variables floattants et entières je regardes si la valeur de la ligne en question a est bien entre les deux bornes
 								val.append(get_one_value(Info_variables[i][4][k]))
@@ -278,14 +299,16 @@ def get_values(Info_variables,nbre_ligne,nbre_variable):
 						k+=1
 					if mod == False: # Si la ligne n'appartient à aucune des parties alors la ligne de notre variable liée prend la valeur None
 						val.append(None)
-			else: 
+			else:
 				for j in range(nbre_ligne): # Pour les variables dépendantes avec une formule on applique la formule pour toute les lignes
 					x=res[index_dependance][j]
-					if Info_variables[i][3] != "": 
-						val.append(eval(Info_variables[i][3]))
+					if x != None:
+						if Info_variables[i][3] != "": 
+							val.append(eval(Info_variables[i][3]))
+						else:
+							val.append(None) # on gere le cas où la formule n'est pas encore remplie et on renvoie la valeur None
 					else:
-						val.append(None) # on gere le cas où la formule n'est pas encore remplie et on renvoie la valeur None
-
+						val.append(None)
 		res.append(val)
 
 	return res
@@ -346,5 +369,4 @@ def main():
 	
 	create_data_set(name_file,nbre_ligne,nbre_variable,Name_variables,Info_variables)
 main()
-
 
