@@ -33,14 +33,14 @@ def get_Info(index_varaible,i):
 	
 	res=[]
 	l,c,r=st.columns(3) #permet de partitionner l'espace en 3 colonnes
-	choice=l.selectbox('Which varaible do you want ?',('personalized','pre-made'),help='With the pre-made: you will use pre-made data base; with the personalized: you will need to provide it',key=f'{index_varaible}_{i}') # permet de faire son choix entre pre-made et personalized
+	choice=l.selectbox('Which varaible do you want?',('personalized','pre-made'),help='With the pre-made: you will use pre-made data base; with the personalized: you will need to provide it',key=f'{index_varaible}_{i}') # permet de faire son choix entre pre-made et personalized
 	res.append(choice)# on ajoute ce choix à la liste des paramètres
 
 	if choice=='pre-made':
 		
 		#si on a choisit pre-made on doit faire le choix de son repertoire puis de la base de donnée
 		
-		type_variable=c.selectbox('Which data do you want ?',('Address','Finance','Datetime','Person','Science'),key=f'type_variable{i}{index_varaible}')
+		type_variable=c.selectbox('Which data do you want?',('Address','Finance','Datetime','Person','Science'),key=f'type_variable{i}{index_varaible}')
 		lov_categories = ['Address','Finance','Datetime','Person','Science']
 		address_lovs = ('address','calling_code','city','continent','coordinates','country','federal_subject','latitude','postal_code','province','region','street_name','street_number')
 		finance_lovs = ('company','company_type','cryptocurrency_iso_code','currency_symbol')
@@ -49,16 +49,16 @@ def get_Info(index_varaible,i):
 		science_lovs = ('dn_asequence')
 		lovs = [address_lovs, finance_lovs, datetime_lovs, person_lovs, science_lovs]
 		dict_lovs = dict(zip(lov_categories, lovs))
-		variable=r.selectbox(f'Which {type_variable} do you want ?', dict_lovs[type_variable], key=f'variable{i}_{index_varaible}')
+		variable=r.selectbox(f'Which {type_variable} do you want?', dict_lovs[type_variable], key=f'variable{i}_{index_varaible}')
 		res.append(variable) #on ajoute la base de donnée a la liste des paramètre
 
 	else:
-		type_variable=c.selectbox('Which type of data do you want ?',('int','float','categorical'),key=f'type{i}_{index_varaible}') #permet de choisir le type de la variable si elle est personnalisée
+		type_variable=c.selectbox('Which type of data do you want?',('int','float','categorical'),key=f'type{i}_{index_varaible}') #permet de choisir le type de la variable si elle est personnalisée
 		res.append(type_variable)
 
 		if type_variable=='float'or type_variable=='int':
 			le,ri=st.columns(2)
-			loi=r.selectbox('Which law do you want ?',('uniform','gauss'),key=f'law{i}_{index_varaible}') # pour des variables entieres et floattantes on peut choisir sa loi
+			loi=r.selectbox('Which law do you want?',('uniform','gauss'),key=f'law{i}_{index_varaible}') # pour des variables entieres et floattantes on peut choisir sa loi
 			res.append(loi) # on ajoute ce choix à la liste de paramètres
 			if loi=='uniform' :
 				max_=le.number_input('value max',key=f'max{i}_{index_varaible}')
@@ -69,7 +69,7 @@ def get_Info(index_varaible,i):
 				sig=ri.number_input('standard error',key=f'sig{i}_{index_varaible}')
 				res.append((moy,sig))
 		else:
-			nbre_category=r.number_input('How many category ?',min_value=1,max_value=12,step=1,key=f'nbre_category{i}_{index_varaible}') # si c'est une variable catégorique on ajoute le nombre de catégories qu'on souhaite
+			nbre_category=r.number_input('How many category?',min_value=1,max_value=12,step=1,key=f'nbre_category{i}_{index_varaible}') # si c'est une variable catégorique on ajoute le nombre de catégories qu'on souhaite
 			liste=[] # la liste des catégories 
 			list_weigth=[] # la liste des poids 
 			columns=st.columns(6) # permet de partionner l'espace en 6
@@ -132,17 +132,17 @@ def get_info_dependant(index_varaible,Name_variables,Info_variables):
 	
 	l,c,r=st.columns(3)
 
-	type_dependance=l.selectbox('Which type of dependance ?',('categorical','formula'),key=f'type_dependance{index_varaible}')
+	type_dependance=l.selectbox('Which type of dependance?',('categorical','formula'),key=f'type_dependance{index_varaible}')
 	Info_variables[index_varaible].append(type_dependance)
 		
 	if type_dependance=='categorical':#Ici on doit recuperer la liste des partitions et la liste des comportements de la variables pour chaque partie de la partition
 		
 		list_independant_categorical=[Name_variables[k]  for k in range(len(Name_variables)-1) if ((Info_variables[k][1]=='personalized' ) or (Info_variables[k][0]=='dependant' and Info_variables[k][1]=='categorical' and Info_variables[k][4][0][0]!='pre-made') or ( Info_variables[k][0]=='dependant' and Info_variables[k][1]=='formula'))]
-		name_dependance=c.selectbox('Dependance with Which variables ?',list_independant_categorical,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées
+		name_dependance=c.selectbox('Dependance with Which variables?',list_independant_categorical,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées
 		index_dependance=get_index_from_name(name_dependance,Name_variables)
 		variable_linked=Info_variables[index_dependance]
 		
-		nbre_behavior=r.number_input('How many behavior do you want ?',step=1,min_value=1,key=f'behavior{index_varaible}')# On demande ici le nombre de comportment et donc de partition 
+		nbre_behavior=r.number_input('How many behavior do you want?',step=1,min_value=1,key=f'behavior{index_varaible}')# On demande ici le nombre de comportment et donc de partition 
 		
 		Info_variables[index_varaible].append(index_dependance)
 		list_partition=[]
@@ -160,7 +160,7 @@ def get_info_dependant(index_varaible,Name_variables,Info_variables):
 
 	else :
 		list_independant_formula=[Name_variables[k] for k in range(len(Name_variables)-1) if ( (Info_variables[k][0]=='independant' and Info_variables[k][1]=='personalized' and  Info_variables[k][2]!='categorical') or (Info_variables[k][0]=='dependant' and  Info_variables[k][1]=='categorical' and Info_variables[k][4][0][1]!='categorical') or ( Info_variables[k][0]=='dependant' and Info_variables[k][1]=='formula') ) ]
-		name_dependance=c.selectbox('Dependance with Which variables ?',list_independant_formula,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées et dont le type est entier ou floattant pour ce type de liaison
+		name_dependance=c.selectbox('Dependance with Which variables?',list_independant_formula,key=f'index_dependance{index_varaible}')# Ici on propose les variables avec laquelle on peut lier celle en construction donc uniquement parmi les variables indépendantes et personnalisées et dont le type est entier ou floattant pour ce type de liaison
 		index_dependance=get_index_from_name(name_dependance,Name_variables)
 		Info_variables[index_varaible].append(index_dependance)
 
@@ -198,7 +198,7 @@ def get_Names_Info(nbre_variable):
 			l,r=st.columns(2)
 			l.text_input('Enter the name of the variable',key=f'variable n°{i}') # modifie le contenu de la clefs f'variable n°{i}'
 			Name_variables.append(st.session_state[f'variable n°{i}'])
-			dependance=r.selectbox('Which dependance do you want ?',('independant','dependant'),key=f'dependance{i}') # récupère le caractère de dépendance
+			dependance=r.selectbox('Which dependance do you want?',('independant','dependant'),key=f'dependance{i}') # récupère le caractère de dépendance
 			Info_variables[i].append(dependance)
 
 			if dependance=='independant':
@@ -324,8 +324,8 @@ def input(): #permet de récuperer les 3 premiers input à savoir le nom du fich
 	
 	l,c,r=st.columns(3)
 	name_file=l.text_input('Insert the name of the new file')
-	nbre_ligne=int(c.number_input('How many rows do you want ?',step=1000))
-	nbre_variable=int(r.number_input('How many variables do you want ?',min_value=1,step=1))
+	nbre_ligne=int(c.number_input('How many rows do you want?',step=1000))
+	nbre_variable=int(r.number_input('How many variables do you want?',min_value=1,step=1))
 
 	return (name_file,nbre_ligne,nbre_variable)
 
